@@ -12,7 +12,7 @@ function Write-Step([string]$Message) {
   Write-Host "[obsidian-sync] $Message" -ForegroundColor Cyan
 }
 
-function Escape-TomlString([string]$Value) {
+function ConvertTo-TomlEscapedString([string]$Value) {
   return ($Value -replace '\\', '\\\\' -replace '"', '\"')
 }
 
@@ -30,7 +30,7 @@ function Get-DefaultTitle([string]$Body, [string]$FileBaseName) {
   return $title
 }
 
-function Ensure-FrontMatter([string]$Content, [string]$FileBaseName, [datetime]$DefaultDate) {
+function Set-FrontMatterDefaults([string]$Content, [string]$FileBaseName, [datetime]$DefaultDate) {
   $dateText = $DefaultDate.ToString("yyyy-MM-ddTHH:mm:ssK")
   $normalized = if ($null -eq $Content) { "" } else { $Content }
 
@@ -39,7 +39,7 @@ function Ensure-FrontMatter([string]$Content, [string]$FileBaseName, [datetime]$
     $fm = $tomlMatch.Groups["fm"].Value.Trim()
     $body = $normalized.Substring($tomlMatch.Length)
     $title = Get-DefaultTitle -Body $body -FileBaseName $FileBaseName
-    $escapedTitle = Escape-TomlString -Value $title
+    $escapedTitle = ConvertTo-TomlEscapedString -Value $title
 
     if ($fm -notmatch '(?m)^title\s*=') { $fm += "`ntitle = `"$escapedTitle`"" }
     if ($fm -notmatch '(?m)^date\s*=') { $fm += "`ndate = $dateText" }
@@ -70,7 +70,7 @@ function Ensure-FrontMatter([string]$Content, [string]$FileBaseName, [datetime]$
   }
 
   $defaultTitle = Get-DefaultTitle -Body $normalized -FileBaseName $FileBaseName
-  $escapedDefaultTitle = Escape-TomlString -Value $defaultTitle
+  $escapedDefaultTitle = ConvertTo-TomlEscapedString -Value $defaultTitle
   $frontMatter = @(
     "+++",
     "title = `"$escapedDefaultTitle`"",
@@ -251,7 +251,7 @@ foreach ($file in $files) {
 
   if ($file.Extension.ToLowerInvariant() -eq ".md") {
     $raw = Get-Content -Path $file.FullName -Raw
-    $fixed = Ensure-FrontMatter -Content $raw -FileBaseName ([IO.Path]::GetFileNameWithoutExtension($file.Name)) -DefaultDate $file.LastWriteTime
+    $fixed = Set-FrontMatterDefaults -Content $raw -FileBaseName ([IO.Path]::GetFileNameWithoutExtension($file.Name)) -DefaultDate $file.LastWriteTime
     Set-Content -Path $targetPath -Value $fixed -Encoding UTF8
     $markdownCount += 1
   } else {
