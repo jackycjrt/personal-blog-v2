@@ -36,6 +36,16 @@ try {
     git checkout $Branch
   }
 
+  $configuredName = git config user.name
+  if ([string]::IsNullOrWhiteSpace($configuredName)) {
+    git config user.name $Owner
+  }
+
+  $configuredEmail = git config user.email
+  if ([string]::IsNullOrWhiteSpace($configuredEmail)) {
+    git config user.email "$Owner@users.noreply.github.com"
+  }
+
   Write-Step "Creating initial commit when needed"
   $hasCommit = $true
   try {
@@ -57,6 +67,9 @@ try {
 
   Write-Step "Checking GitHub CLI authentication"
   gh auth status
+  if ($LASTEXITCODE -ne 0) {
+    throw "GitHub CLI is not authenticated. Run gh auth login and rerun this script."
+  }
 
   $repo = "$Owner/$RepoName"
   Write-Step "Preparing remote repository $repo"
