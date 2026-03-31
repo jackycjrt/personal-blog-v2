@@ -1,0 +1,108 @@
+{{ define "main" }}
+  {{ $posts := where .Site.RegularPages "Section" "posts" }}
+  {{ $featuredPosts := first 4 (sort $posts "Date" "desc") }}
+  {{ $heroPosts := first 3 (sort $posts "Date" "desc") }}
+  {{ $projects := first 5 (sort (where .Site.RegularPages "Section" "projects") "Date" "desc") }}
+  {{ $notes := first 5 (sort (where .Site.RegularPages "Section" "notes") "Date" "desc") }}
+
+  <section class="hero shell">
+    <div class="hero-grid">
+      <div class="hero-content reveal">
+        <p class="eyebrow">{{ .Site.Params.heroEyebrow | default "CONTENT FIRST" }}</p>
+        <h1>{{ .Site.Params.heroTitle | default .Site.Title }}</h1>
+        <p class="hero-subtitle">{{ .Site.Params.heroSubtitle | default .Site.Params.description }}</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="{{ .Site.Params.heroButtonLink | default "/posts/" | relLangURL }}">{{ .Site.Params.heroButtonText | default "查看博客" }}</a>
+          <a class="btn-ghost" href="{{ "/about/" | relLangURL }}">了解我</a>
+        </div>
+        <div class="hero-chips" aria-label="博客内容范围">
+          <span>技术实践</span>
+          <span>学习方法</span>
+          <span>生活观察</span>
+          <span>阶段复盘</span>
+        </div>
+      </div>
+
+      <aside class="hero-panel reveal" aria-label="最新内容速览">
+        <p class="hero-panel-label">Latest</p>
+        <h2>最近更新</h2>
+        <ul class="hero-panel-list">
+          {{ range $heroPosts }}
+            <li>
+              <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+              <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
+            </li>
+          {{ else }}
+            <li>
+              <span>暂无最新内容</span>
+            </li>
+          {{ end }}
+        </ul>
+        <a class="hero-panel-link" href="{{ "/posts/" | relLangURL }}">浏览全部文章</a>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section shell">
+    <div class="section-head reveal">
+      <h2>博客精选</h2>
+      <a class="section-link" href="{{ "/posts/" | relLangURL }}">查看全部</a>
+    </div>
+    <div class="post-grid">
+      {{ range $featuredPosts }}
+        <article class="post-card reveal">
+          <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+          <p class="meta">{{ .Date | time.Format "2006-01-02" }}</p>
+          {{ with .Params.summary }}
+            <p class="summary">{{ . }}</p>
+          {{ end }}
+        </article>
+      {{ else }}
+        <p class="empty-state">当前还没有博客内容。</p>
+      {{ end }}
+    </div>
+  </section>
+
+  <section class="section shell">
+    <div class="split-grid">
+      <div class="reveal">
+        <div class="section-head">
+          <h2>项目</h2>
+          <a class="section-link" href="{{ "/projects/" | relLangURL }}">查看全部</a>
+        </div>
+        <ul class="simple-list">
+          {{ range $projects }}
+            <li>
+              <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+              <span>{{ .Date | time.Format "2006-01-02" }}</span>
+            </li>
+          {{ else }}
+            <li><span>暂无项目内容</span></li>
+          {{ end }}
+        </ul>
+      </div>
+
+      <div class="reveal">
+        <div class="section-head">
+          <h2>杂记</h2>
+          <a class="section-link" href="{{ "/notes/" | relLangURL }}">查看全部</a>
+        </div>
+        <ul class="line-list">
+          {{ range $notes }}
+            <li>
+              <div>
+                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+                {{ with .Params.summary }}
+                  <p>{{ . }}</p>
+                {{ end }}
+              </div>
+              <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
+            </li>
+          {{ else }}
+            <li><span>暂无杂记内容</span></li>
+          {{ end }}
+        </ul>
+      </div>
+    </div>
+  </section>
+{{ end }}

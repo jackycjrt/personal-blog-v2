@@ -1,0 +1,63 @@
+{{ define "main" }}
+  {{ $posts := sort (where .Site.RegularPages "Section" "posts") "Date" "desc" }}
+  {{ $paginator := .Paginate $posts }}
+
+  <section class="page-intro narrow reveal">
+    <p class="eyebrow">BLOG</p>
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}
+      <p class="lead">{{ . }}</p>
+    {{ end }}
+  </section>
+
+  <section class="section narrow">
+    <div class="tag-filter reveal" aria-label="标签筛选">
+      <a class="tag-chip is-active" href="{{ "/posts/" | relLangURL }}">全部</a>
+      {{ range .Site.Taxonomies.tags.ByCount }}
+        <a class="tag-chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>
+      {{ end }}
+    </div>
+
+    <div class="stack-list">
+      {{ range $paginator.Pages }}
+        {{ $summary := .Params.summary | default (.Summary | plainify) }}
+        <article class="post-row reveal">
+          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+          <p class="meta-line">
+            <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
+            {{ with .Params.tags }}
+              <span>·</span>
+              <span class="post-tags">
+                {{ range $index, $tag := . }}
+                  {{ if gt $index 0 }}<span class="tag-sep">/</span>{{ end }}
+                  <a class="tag-link" href="{{ (printf "/tags/%s/" ($tag | urlize)) | relLangURL }}">{{ $tag }}</a>
+                {{ end }}
+              </span>
+            {{ end }}
+          </p>
+          {{ with $summary }}
+            <p>{{ . }}</p>
+          {{ end }}
+        </article>
+      {{ else }}
+        <p class="empty-state">当前暂无博客内容。</p>
+      {{ end }}
+    </div>
+
+    {{ if gt $paginator.TotalPages 1 }}
+      <nav class="pager" aria-label="博客分页">
+        {{ if $paginator.HasPrev }}
+          <a class="pager-link" href="{{ $paginator.Prev.URL }}">上一页</a>
+        {{ else }}
+          <span class="pager-link is-disabled">上一页</span>
+        {{ end }}
+        <span class="pager-status">第 {{ $paginator.PageNumber }} / {{ $paginator.TotalPages }} 页</span>
+        {{ if $paginator.HasNext }}
+          <a class="pager-link" href="{{ $paginator.Next.URL }}">下一页</a>
+        {{ else }}
+          <span class="pager-link is-disabled">下一页</span>
+        {{ end }}
+      </nav>
+    {{ end }}
+  </section>
+{{ end }}

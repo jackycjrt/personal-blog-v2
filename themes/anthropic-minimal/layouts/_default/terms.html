@@ -1,0 +1,17 @@
+{{ define "main" }}
+  <section class="page-intro narrow reveal">
+    <p class="eyebrow">{{ upper .Data.Plural }}</p>
+    <h1>{{ .Title }}</h1>
+    <p class="lead">点击任一条目查看对应内容。</p>
+  </section>
+
+  <section class="section narrow">
+    <div class="tag-filter reveal">
+      {{ range .Data.Terms.Alphabetical }}
+        <a class="tag-chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }} ({{ .Count }})</a>
+      {{ else }}
+        <span class="empty-state">当前没有可用条目。</span>
+      {{ end }}
+    </div>
+  </section>
+{{ end }}

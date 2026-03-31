@@ -1,0 +1,49 @@
+{{ define "main" }}
+  {{ $notes := sort (where .Site.RegularPages "Section" "notes") "Date" "desc" }}
+  {{ $paginator := .Paginate $notes }}
+
+  <section class="page-intro narrow reveal">
+    <p class="eyebrow">NOTES</p>
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}
+      <p class="lead">{{ . }}</p>
+    {{ end }}
+  </section>
+
+  <section class="section narrow">
+    <ul class="line-list">
+      {{ range $paginator.Pages }}
+        {{ $summary := .Params.summary | default (.Summary | plainify) }}
+        <li class="reveal">
+          <div>
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+            {{ with $summary }}
+              <p>{{ . }}</p>
+            {{ end }}
+          </div>
+          <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
+        </li>
+      {{ else }}
+        <li>
+          <span>当前暂无杂记内容。</span>
+        </li>
+      {{ end }}
+    </ul>
+
+    {{ if gt $paginator.TotalPages 1 }}
+      <nav class="pager" aria-label="杂记分页">
+        {{ if $paginator.HasPrev }}
+          <a class="pager-link" href="{{ $paginator.Prev.URL }}">上一页</a>
+        {{ else }}
+          <span class="pager-link is-disabled">上一页</span>
+        {{ end }}
+        <span class="pager-status">第 {{ $paginator.PageNumber }} / {{ $paginator.TotalPages }} 页</span>
+        {{ if $paginator.HasNext }}
+          <a class="pager-link" href="{{ $paginator.Next.URL }}">下一页</a>
+        {{ else }}
+          <span class="pager-link is-disabled">下一页</span>
+        {{ end }}
+      </nav>
+    {{ end }}
+  </section>
+{{ end }}

@@ -1,0 +1,26 @@
+{{ $current := . }}
+<header id="siteHeader" class="site-header">
+  <div class="shell header-inner">
+    <a class="brand" href="{{ "/" | relLangURL }}">{{ .Site.Params.brand | default .Site.Title }}</a>
+    <nav class="main-nav" aria-label="主导航">
+      {{ range .Site.Menus.main }}
+        {{ $isHome := and (eq .URL "/") $current.IsHome }}
+        {{ $isNested := and (ne .URL "/") (hasPrefix $current.RelPermalink .URL) }}
+        {{ $isActive := or $isHome $isNested ($current.IsMenuCurrent "main" .) ($current.HasMenuCurrent "main" .) }}
+        <a class="nav-link{{ if $isActive }} is-active{{ end }}" href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+      {{ end }}
+    </nav>
+    <div class="header-actions">
+      <a class="nav-cta" href="{{ "/posts/" | relLangURL }}">开始阅读</a>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="切换亮暗模式" title="切换亮暗模式">
+        <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+        </svg>
+        <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2"></circle>
+          <path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>

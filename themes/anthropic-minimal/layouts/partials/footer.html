@@ -1,0 +1,17 @@
+{{ $author := .Site.Params.author | default .Site.Title }}
+{{ $footerNote := .Site.Params.footerNote | default "Minimal. Rational. Personal." }}
+{{ $emailRaw := .Site.Params.email | default "" }}
+{{ $emailLink := cond (hasPrefix $emailRaw "mailto:") $emailRaw (printf "mailto:%s" $emailRaw) }}
+<footer class="site-footer">
+  <div class="shell footer-inner">
+    <p class="footer-text">© {{ now.Year }} {{ $author }} · {{ $footerNote }}</p>
+    <div class="footer-links" aria-label="社交链接">
+      {{ with .Site.Params.github }}
+        <a href="{{ . }}" target="_blank" rel="noopener noreferrer">GitHub</a>
+      {{ end }}
+      {{ with $emailRaw }}
+        <a href="{{ $emailLink }}">邮箱</a>
+      {{ end }}
+    </div>
+  </div>
+</footer>

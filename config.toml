@@ -1,0 +1,65 @@
+baseURL = "http://localhost:1313/"
+locale = "zh-CN"
+defaultContentLanguage = "zh-cn"
+hasCJKLanguage = true
+title = "极简个人博客"
+theme = "anthropic-minimal"
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 6
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[params]
+  author = "你的名字"
+  brand = "你的名字"
+  description = "内容优先、阅读舒适、交互极简的个人博客。"
+  defaultTheme = "auto"
+  heroEyebrow = "CONTENT FIRST"
+  heroTitle = "用克制的表达，记录长期有价值的内容。"
+  heroSubtitle = "这里会持续更新技术实践、学习方法、生活随笔与阶段复盘。"
+  heroButtonText = "查看博客"
+  heroButtonLink = "/posts/"
+  footerNote = "Built with Hugo"
+  github = "https://github.com/your-github-id"
+  email = "you@example.com"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    noClasses = false
+
+[[menu.main]]
+  identifier = "home"
+  name = "首页"
+  pageRef = "/"
+  weight = 10
+
+[[menu.main]]
+  identifier = "posts"
+  name = "博客"
+  pageRef = "/posts"
+  weight = 20
+
+[[menu.main]]
+  identifier = "projects"
+  name = "项目"
+  pageRef = "/projects"
+  weight = 30
+
+[[menu.main]]
+  identifier = "about"
+  name = "关于"
+  pageRef = "/about"
+  weight = 40
+
+[[menu.main]]
+  identifier = "notes"
+  name = "杂记"
+  pageRef = "/notes"
+  weight = 50

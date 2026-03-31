@@ -1,0 +1,38 @@
+{{ define "main" }}
+  <article class="article reading">
+    <header class="article-header reveal">
+      <h1>{{ .Title }}</h1>
+      <p class="meta-line">
+        {{ with .Date }}
+          <time datetime="{{ . | time.Format "2006-01-02" }}">{{ . | time.Format "2006-01-02" }}</time>
+        {{ end }}
+        {{ with .Params.tags }}
+          <span>·</span>
+          <span class="post-tags">
+            {{ range $index, $tag := . }}
+              {{ if gt $index 0 }}<span class="tag-sep">/</span>{{ end }}
+              <a class="tag-link" href="{{ (printf "/tags/%s/" ($tag | urlize)) | relLangURL }}">{{ $tag }}</a>
+            {{ end }}
+          </span>
+        {{ end }}
+      </p>
+    </header>
+
+    <div class="article-content reveal">
+      {{ .Content }}
+    </div>
+
+    <nav class="article-nav reveal" aria-label="上一篇和下一篇">
+      {{ with .PrevInSection }}
+        <a href="{{ .RelPermalink }}">上一篇：{{ .Title }}</a>
+      {{ else }}
+        <span class="meta">已经是最新一篇</span>
+      {{ end }}
+      {{ with .NextInSection }}
+        <a href="{{ .RelPermalink }}">下一篇：{{ .Title }}</a>
+      {{ else }}
+        <span class="meta">已经是最早一篇</span>
+      {{ end }}
+    </nav>
+  </article>
+{{ end }}

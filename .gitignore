@@ -1,0 +1,7 @@
+public/
+resources/_gen/
+.hugo_build.lock
+.obsidian-export-staging/
+.venv/
+__pycache__/
+*.pyc

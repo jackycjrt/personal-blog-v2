@@ -1,0 +1,13 @@
+name = "anthropic-minimal"
+license = "MIT"
+licenselink = "https://opensource.org/licenses/MIT"
+description = "Anthropic-inspired minimal Hugo theme for long-form reading."
+homepage = "https://example.com"
+demosite = "https://example.com"
+tags = ["blog", "minimal", "light-dark", "responsive"]
+features = ["responsive", "dark mode", "pagination", "taxonomy"]
+min_version = "0.120.0"
+
+[author]
+  name = "Local Theme Customization"
+  homepage = "https://example.com"

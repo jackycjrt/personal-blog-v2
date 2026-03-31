@@ -1,0 +1,14 @@
+{
+  "vaultDir": "C:/Users/Ycjrt/OneDrive/应用/remotely-save/yu",
+  "sourceBlogDir": "C:/Users/Ycjrt/OneDrive/应用/remotely-save/yu/40_知识库/Blog",
+  "managedSubdir": "obsidian",
+  "mapping": {
+    "posts": ["posts", "post", "blog", "tech", "study"],
+    "notes": ["notes", "note", "life", "daily", "journal"],
+    "projects": ["projects", "project"]
+  },
+  "owner": "jackycjrt",
+  "repository": "personal-blog-v2",
+  "branch": "main",
+  "deployment": "github-pages"
+}
