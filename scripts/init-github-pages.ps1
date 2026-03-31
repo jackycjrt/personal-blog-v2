@@ -13,6 +13,22 @@ function Write-Step([string]$Message) {
   Write-Host "[github-init] $Message" -ForegroundColor Cyan
 }
 
+$script:GhExe = $null
+$ghCmd = Get-Command gh -ErrorAction SilentlyContinue
+if ($ghCmd) {
+  $script:GhExe = $ghCmd.Source
+} elseif (Test-Path "C:\Program Files\GitHub CLI\gh.exe") {
+  $script:GhExe = "C:\Program Files\GitHub CLI\gh.exe"
+}
+
+if ([string]::IsNullOrWhiteSpace($script:GhExe)) {
+  throw "GitHub CLI not found. Install GitHub.cli first."
+}
+
+function Invoke-Gh([string[]]$Arguments) {
+  & $script:GhExe @Arguments
+}
+
 $siteRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Push-Location $siteRoot
 try {
@@ -66,7 +82,7 @@ try {
   }
 
   Write-Step "Checking GitHub CLI authentication"
-  gh auth status
+  Invoke-Gh -Arguments @("auth", "status")
   if ($LASTEXITCODE -ne 0) {
     throw "GitHub CLI is not authenticated. Run gh auth login and rerun this script."
   }
@@ -76,7 +92,7 @@ try {
 
   $repoExists = $false
   try {
-    gh repo view $repo 1>$null 2>$null
+    Invoke-Gh -Arguments @("repo", "view", $repo)
     $repoExists = ($LASTEXITCODE -eq 0)
   } catch {
     $repoExists = $false
@@ -91,7 +107,14 @@ try {
   }
 
   if (-not $repoExists) {
-    gh repo create $repo --$Visibility --source . --remote origin --push --description "Personal Hugo blog with Obsidian workflow"
+    Invoke-Gh -Arguments @(
+      "repo", "create", $repo,
+      "--$Visibility",
+      "--source", ".",
+      "--remote", "origin",
+      "--push",
+      "--description", "Personal Hugo blog with Obsidian workflow"
+    )
   } else {
     if (-not $hasOrigin) {
       git remote add origin "https://github.com/$repo.git"
