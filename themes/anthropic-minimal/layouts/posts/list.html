@@ -12,7 +12,7 @@
 
   <section class="section narrow">
     <div class="tag-filter reveal" aria-label="标签筛选">
-      <a class="tag-chip is-active" href="{{ "/posts/" | relURL }}">全部</a>
+      <a class="tag-chip is-active" href="{{ "/posts/" | absURL }}">全部</a>
       {{ range .Site.Taxonomies.tags.ByCount }}
         <a class="tag-chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>
       {{ end }}
@@ -30,7 +30,7 @@
               <span class="post-tags">
                 {{ range $index, $tag := . }}
                   {{ if gt $index 0 }}<span class="tag-sep">/</span>{{ end }}
-                  <a class="tag-link" href="{{ (printf "/tags/%s/" ($tag | urlize)) | relURL }}">{{ $tag }}</a>
+                  <a class="tag-link" href="{{ (printf "/tags/%s/" ($tag | urlize)) | absURL }}">{{ $tag }}</a>
                 {{ end }}
               </span>
             {{ end }}
