@@ -11,7 +11,7 @@
   {{ if $isTag }}
     <section class="section narrow">
       <div class="tag-filter reveal" aria-label="标签筛选">
-        <a class="tag-chip" href="{{ "/posts/" | relLangURL }}">全部</a>
+        <a class="tag-chip" href="{{ "/posts/" | relURL }}">全部</a>
         {{ range .Site.Taxonomies.tags.ByCount }}
           <a class="tag-chip{{ if eq .Page.Title $.Title }} is-active{{ end }}" href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>
         {{ end }}

@@ -12,8 +12,8 @@
         <h1>{{ .Site.Params.heroTitle | default .Site.Title }}</h1>
         <p class="hero-subtitle">{{ .Site.Params.heroSubtitle | default .Site.Params.description }}</p>
         <div class="hero-actions">
-          <a class="btn-primary" href="{{ .Site.Params.heroButtonLink | default "/posts/" | relLangURL }}">{{ .Site.Params.heroButtonText | default "查看博客" }}</a>
-          <a class="btn-ghost" href="{{ "/about/" | relLangURL }}">了解我</a>
+          <a class="btn-primary" href="{{ .Site.Params.heroButtonLink | default "/posts/" | relURL }}">{{ .Site.Params.heroButtonText | default "查看博客" }}</a>
+          <a class="btn-ghost" href="{{ "/about/" | relURL }}">了解我</a>
         </div>
         <div class="hero-chips" aria-label="博客内容范围">
           <span>技术实践</span>
@@ -38,7 +38,7 @@
             </li>
           {{ end }}
         </ul>
-        <a class="hero-panel-link" href="{{ "/posts/" | relLangURL }}">浏览全部文章</a>
+        <a class="hero-panel-link" href="{{ "/posts/" | relURL }}">浏览全部文章</a>
       </aside>
     </div>
   </section>
@@ -46,7 +46,7 @@
   <section class="section shell">
     <div class="section-head reveal">
       <h2>博客精选</h2>
-      <a class="section-link" href="{{ "/posts/" | relLangURL }}">查看全部</a>
+      <a class="section-link" href="{{ "/posts/" | relURL }}">查看全部</a>
     </div>
     <div class="post-grid">
       {{ range $featuredPosts }}
@@ -68,7 +68,7 @@
       <div class="reveal">
         <div class="section-head">
           <h2>项目</h2>
-          <a class="section-link" href="{{ "/projects/" | relLangURL }}">查看全部</a>
+          <a class="section-link" href="{{ "/projects/" | relURL }}">查看全部</a>
         </div>
         <ul class="simple-list">
           {{ range $projects }}
@@ -85,7 +85,7 @@
       <div class="reveal">
         <div class="section-head">
           <h2>杂记</h2>
-          <a class="section-link" href="{{ "/notes/" | relLangURL }}">查看全部</a>
+          <a class="section-link" href="{{ "/notes/" | relURL }}">查看全部</a>
         </div>
         <ul class="line-list">
           {{ range $notes }}
