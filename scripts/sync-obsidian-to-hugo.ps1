@@ -30,8 +30,10 @@ function Get-DefaultTitle([string]$Body, [string]$FileBaseName) {
   return $title
 }
 
-function Set-FrontMatterDefaults([string]$Content, [string]$FileBaseName, [datetime]$DefaultDate) {
+function Set-FrontMatterDefaults([string]$Content, [string]$FileBaseName, [datetime]$DefaultDate, [bool]$DefaultDraft = $true) {
   $dateText = $DefaultDate.ToString("yyyy-MM-ddTHH:mm:ssK")
+  $draftTextToml = if ($DefaultDraft) { "true" } else { "false" }
+  $draftTextYaml = if ($DefaultDraft) { "true" } else { "false" }
   $normalized = if ($null -eq $Content) { "" } else { $Content }
 
   $tomlMatch = [regex]::Match($normalized, '^\+\+\+\r?\n(?<fm>[\s\S]*?)\r?\n\+\+\+\r?\n?', [System.Text.RegularExpressions.RegexOptions]::Singleline)
@@ -43,7 +45,11 @@ function Set-FrontMatterDefaults([string]$Content, [string]$FileBaseName, [datet
 
     if ($fm -notmatch '(?m)^title\s*=') { $fm += "`ntitle = `"$escapedTitle`"" }
     if ($fm -notmatch '(?m)^date\s*=') { $fm += "`ndate = $dateText" }
-    if ($fm -notmatch '(?m)^draft\s*=') { $fm += "`ndraft = true" }
+    if ($fm -match '(?m)^draft\s*=') {
+      $fm = [regex]::Replace($fm, '(?m)^draft\s*=.*$', "draft = $draftTextToml")
+    } else {
+      $fm += "`ndraft = $draftTextToml"
+    }
     if ($fm -notmatch '(?m)^tags\s*=') { $fm += "`ntags = []" }
     if ($fm -notmatch '(?m)^categories\s*=') { $fm += "`ncategories = []" }
     if ($fm -notmatch '(?m)^summary\s*=') { $fm += "`nsummary = `"`"" }
@@ -60,7 +66,11 @@ function Set-FrontMatterDefaults([string]$Content, [string]$FileBaseName, [datet
 
     if ($fm -notmatch '(?m)^title\s*:') { $fm += "`ntitle: `"$title`"" }
     if ($fm -notmatch '(?m)^date\s*:') { $fm += "`ndate: `"$dateText`"" }
-    if ($fm -notmatch '(?m)^draft\s*:') { $fm += "`ndraft: true" }
+    if ($fm -match '(?m)^draft\s*:') {
+      $fm = [regex]::Replace($fm, '(?m)^draft\s*:.*$', "draft: $draftTextYaml")
+    } else {
+      $fm += "`ndraft: $draftTextYaml"
+    }
     if ($fm -notmatch '(?m)^tags\s*:') { $fm += "`ntags: []" }
     if ($fm -notmatch '(?m)^categories\s*:') { $fm += "`ncategories: []" }
     if ($fm -notmatch '(?m)^summary\s*:') { $fm += "`nsummary: `"`"" }
@@ -75,7 +85,7 @@ function Set-FrontMatterDefaults([string]$Content, [string]$FileBaseName, [datet
     "+++",
     "title = `"$escapedDefaultTitle`"",
     "date = $dateText",
-    "draft = true",
+    "draft = $draftTextToml",
     "tags = []",
     "categories = []",
     "summary = `"`"",
@@ -102,6 +112,15 @@ if ([string]::IsNullOrWhiteSpace($SourceBlogDir)) {
 $managedSubdir = "obsidian"
 if ($null -ne $config -and $null -ne $config.managedSubdir -and -not [string]::IsNullOrWhiteSpace([string]$config.managedSubdir)) {
   $managedSubdir = [string]$config.managedSubdir
+}
+
+$defaultDraft = $true
+if ($null -ne $config -and $null -ne $config.defaultDraft) {
+  try {
+    $defaultDraft = [bool]$config.defaultDraft
+  } catch {
+    $defaultDraft = $true
+  }
 }
 
 $postsFolders = @("`u6587`u7AE0", "`u535A`u5BA2", "`u6280`u672F", "`u5B66`u4E60", "posts", "post", "blog", "tech", "study")
@@ -251,7 +270,9 @@ foreach ($file in $files) {
 
   if ($file.Extension.ToLowerInvariant() -eq ".md") {
     $raw = Get-Content -Path $file.FullName -Raw -Encoding UTF8
-    $fixed = Set-FrontMatterDefaults -Content $raw -FileBaseName ([IO.Path]::GetFileNameWithoutExtension($file.Name)) -DefaultDate $file.LastWriteTime
+    if ($null -eq $raw) { $raw = "" }
+    $raw = [regex]::Replace($raw, '\{\{<\s*ref\s+"([^"]+)"\s*>\}\}', './$1')
+    $fixed = Set-FrontMatterDefaults -Content $raw -FileBaseName ([IO.Path]::GetFileNameWithoutExtension($file.Name)) -DefaultDate $file.LastWriteTime -DefaultDraft $defaultDraft
     Set-Content -Path $targetPath -Value $fixed -Encoding UTF8
     $markdownCount += 1
   } else {
