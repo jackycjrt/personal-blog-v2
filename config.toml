@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313/"
+baseURL = "https://jackycjrt.github.io/personal-blog-v2/"
 locale = "zh-CN"
 defaultContentLanguage = "zh-cn"
 hasCJKLanguage = true
