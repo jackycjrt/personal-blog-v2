@@ -104,9 +104,9 @@ if ($null -ne $config -and $null -ne $config.managedSubdir -and -not [string]::I
   $managedSubdir = [string]$config.managedSubdir
 }
 
-$postsFolders = @("posts", "post", "blog", "tech", "study")
-$notesFolders = @("notes", "note", "life", "journal", "daily")
-$projectFolders = @("projects", "project")
+$postsFolders = @("`u6587`u7AE0", "`u535A`u5BA2", "`u6280`u672F", "`u5B66`u4E60", "posts", "post", "blog", "tech", "study")
+$notesFolders = @("`u6742`u8BB0", "`u7B14`u8BB0", "`u751F`u6D3B", "`u65E5`u8BB0", "notes", "note", "life", "journal", "daily")
+$projectFolders = @("`u9879`u76EE", "projects", "project")
 
 if ($null -ne $config -and $null -ne $config.mapping) {
   if ($null -ne $config.mapping.posts) { $postsFolders = @($config.mapping.posts) }
@@ -239,7 +239,7 @@ $markdownCount = 0
 $assetCount = 0
 
 foreach ($file in $files) {
-  $relativePath = $file.FullName.Substring($stagingDir.Length).TrimStart("\\", "/")
+  $relativePath = $file.FullName.Substring($stagingDir.Length).TrimStart("\", "/")
   $target = Resolve-Destination -RelativePath $relativePath
   $targetRoot = Join-Path (Join-Path $contentRoot $target.Section) $managedSubdir
   $targetPath = Join-Path $targetRoot ($target.SubPath -replace '/', '\\')
@@ -250,7 +250,7 @@ foreach ($file in $files) {
   }
 
   if ($file.Extension.ToLowerInvariant() -eq ".md") {
-    $raw = Get-Content -Path $file.FullName -Raw
+    $raw = Get-Content -Path $file.FullName -Raw -Encoding UTF8
     $fixed = Set-FrontMatterDefaults -Content $raw -FileBaseName ([IO.Path]::GetFileNameWithoutExtension($file.Name)) -DefaultDate $file.LastWriteTime
     Set-Content -Path $targetPath -Value $fixed -Encoding UTF8
     $markdownCount += 1
