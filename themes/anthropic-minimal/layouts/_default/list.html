@@ -1,45 +1,60 @@
 {{ define "main" }}
   {{ $pages := .RegularPagesRecursive }}
-  {{ $paginator := .Paginate (sort $pages "Date" "desc") }}
+  {{ $sorted := sort $pages "Date" "desc" }}
+  {{ $lead := index $sorted 0 }}
+  {{ $rest := after 1 $sorted }}
+  {{ $paginator := .Paginate $rest }}
 
-  <section class="page-intro narrow reveal">
-    <p class="eyebrow">{{ upper (.Section | default "list") }}</p>
-    <h1>{{ .Title }}</h1>
-    {{ with .Description }}
-      <p class="lead">{{ . }}</p>
+  <section class="page-hero shell">
+    <div class="page-hero-copy reveal">
+      <p class="section-kicker">{{ .Section | default .Data.Plural }}</p>
+      <h1>{{ .Title }}</h1>
+      <p class="page-intro">{{ .Description | default .Summary | default .Site.Params.description }}</p>
+    </div>
+    {{ with $lead }}
+      <article class="lead-story reveal">
+        <p class="panel-label">Featured</p>
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        <p>{{ .Params.summary | default (.Summary | plainify) }}</p>
+        <span>{{ .Date | time.Format "2006.01.02" }}</span>
+      </article>
     {{ end }}
   </section>
 
-  <section class="section narrow">
-    <div class="stack-list">
+  <section class="section shell">
+    <div class="editorial-list">
       {{ range $paginator.Pages }}
-        {{ $summary := .Params.summary | default (.Summary | plainify) }}
-        <article class="post-row reveal">
-          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-          <p class="meta-line">
-            <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
-          </p>
-          {{ with $summary }}
-            <p>{{ . }}</p>
-          {{ end }}
+        <article class="editorial-row reveal">
+          <div class="row-meta">
+            <span>{{ .Date | time.Format "2006.01.02" }}</span>
+          </div>
+          <div class="row-body">
+            <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+            <p>{{ .Params.summary | default (.Summary | plainify) }}</p>
+          </div>
+          <div class="row-tail">
+            <span>{{ .Section }}</span>
+          </div>
         </article>
       {{ else }}
-        <p class="empty-state">当前暂无内容。</p>
+        <div class="empty-card reveal">
+          <p>No entries here yet.</p>
+        </div>
       {{ end }}
     </div>
 
     {{ if gt $paginator.TotalPages 1 }}
-      <nav class="pager" aria-label="分页">
+      <nav class="pager reveal" aria-label="Pagination">
         {{ if $paginator.HasPrev }}
-          <a class="pager-link" href="{{ $paginator.Prev.URL }}">上一页</a>
+          <a class="pager-link" href="{{ $paginator.Prev.URL }}">Previous</a>
         {{ else }}
-          <span class="pager-link is-disabled">上一页</span>
+          <span class="pager-link is-disabled">Previous</span>
         {{ end }}
-        <span class="pager-status">第 {{ $paginator.PageNumber }} / {{ $paginator.TotalPages }} 页</span>
+        <span class="pager-status">{{ $paginator.PageNumber }} / {{ $paginator.TotalPages }}</span>
         {{ if $paginator.HasNext }}
-          <a class="pager-link" href="{{ $paginator.Next.URL }}">下一页</a>
+          <a class="pager-link" href="{{ $paginator.Next.URL }}">Next</a>
         {{ else }}
-          <span class="pager-link is-disabled">下一页</span>
+          <span class="pager-link is-disabled">Next</span>
         {{ end }}
       </nav>
     {{ end }}

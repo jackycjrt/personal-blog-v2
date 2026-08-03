@@ -1,37 +1,42 @@
 {{ define "main" }}
-  <article class="article reading">
+  <article class="article-shell shell">
     <header class="article-header reveal">
+      <p class="section-kicker">{{ .Section }}</p>
       <h1>{{ .Title }}</h1>
-      <p class="meta-line">
+      {{ with .Params.summary }}
+        <p class="article-summary">{{ . }}</p>
+      {{ end }}
+      <div class="article-meta">
         {{ with .Date }}
-          <time datetime="{{ . | time.Format "2006-01-02" }}">{{ . | time.Format "2006-01-02" }}</time>
+          <time datetime="{{ . | time.Format "2006-01-02" }}">{{ . | time.Format "2006.01.02" }}</time>
         {{ end }}
-        {{ with .Params.tags }}
-          <span>·</span>
-          <span class="post-tags">
-            {{ range $index, $tag := . }}
-              {{ if gt $index 0 }}<span class="tag-sep">/</span>{{ end }}
-              <a class="tag-link" href="{{ (printf "tags/%s/" ($tag | urlize)) | absURL }}">{{ $tag }}</a>
-            {{ end }}
-          </span>
+        {{ with .ReadingTime }}
+          <span>{{ . }} min read</span>
         {{ end }}
-      </p>
+      </div>
+      {{ with .Params.tags }}
+        <div class="tag-row">
+          {{ range . }}
+            <a class="tag-chip" href="{{ (printf "tags/%s/" (. | urlize)) | absURL }}">{{ . }}</a>
+          {{ end }}
+        </div>
+      {{ end }}
     </header>
 
-    <div class="article-content reveal">
+    <div class="article-body reveal">
       {{ .Content }}
     </div>
 
-    <nav class="article-nav reveal" aria-label="上一篇和下一篇">
+    <nav class="article-nav reveal" aria-label="Article navigation">
       {{ with .PrevInSection }}
-        <a href="{{ .RelPermalink }}">上一篇：{{ .Title }}</a>
+        <a href="{{ .RelPermalink }}">Previous: {{ .Title }}</a>
       {{ else }}
-        <span class="meta">已经是最新一篇</span>
+        <span>No newer entry</span>
       {{ end }}
       {{ with .NextInSection }}
-        <a href="{{ .RelPermalink }}">下一篇：{{ .Title }}</a>
+        <a href="{{ .RelPermalink }}">Next: {{ .Title }}</a>
       {{ else }}
-        <span class="meta">已经是最早一篇</span>
+        <span>No older entry</span>
       {{ end }}
     </nav>
   </article>

@@ -1,16 +1,23 @@
 {{ define "main" }}
-  <section class="page-intro narrow reveal">
-    <p class="eyebrow">{{ upper .Data.Plural }}</p>
-    <h1>{{ .Title }}</h1>
-    <p class="lead">点击任一条目查看对应内容。</p>
+  <section class="page-hero shell">
+    <div class="page-hero-copy reveal">
+      <p class="section-kicker">{{ .Data.Plural }}</p>
+      <h1>{{ .Title }}</h1>
+      <p class="page-intro">Browse the editorial index by term.</p>
+    </div>
   </section>
 
-  <section class="section narrow">
-    <div class="tag-filter reveal">
+  <section class="section shell">
+    <div class="term-grid">
       {{ range .Data.Terms.Alphabetical }}
-        <a class="tag-chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }} ({{ .Count }})</a>
+        <a class="term-card reveal" href="{{ .Page.RelPermalink }}">
+          <strong>{{ .Page.Title }}</strong>
+          <span>{{ .Count }} entries</span>
+        </a>
       {{ else }}
-        <span class="empty-state">当前没有可用条目。</span>
+        <div class="empty-card reveal">
+          <p>No terms available yet.</p>
+        </div>
       {{ end }}
     </div>
   </section>

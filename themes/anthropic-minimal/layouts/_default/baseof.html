@@ -4,15 +4,13 @@
     {{ partial "head.html" . }}
   </head>
   <body>
-    <a class="skip-link" href="#mainContent">跳到正文</a>
+    <a class="skip-link" href="#mainContent">Skip to content</a>
+    <div id="readingProgress" class="reading-progress"></div>
     {{ partial "header.html" . }}
-
-    <main id="mainContent" class="main-content">
+    <main id="mainContent" class="site-main">
       {{ block "main" . }}{{ end }}
     </main>
-
     {{ partial "footer.html" . }}
-
     {{ $js := resources.Get "js/main.js" | resources.Minify | resources.Fingerprint }}
     <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
   </body>

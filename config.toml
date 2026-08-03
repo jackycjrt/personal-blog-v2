@@ -2,7 +2,7 @@ baseURL = "https://jackycjrt.github.io/personal-blog-v2/"
 locale = "zh-CN"
 defaultContentLanguage = "zh-cn"
 hasCJKLanguage = true
-title = "极简个人博客"
+title = "Jack Bird"
 theme = "anthropic-minimal"
 enableRobotsTXT = true
 
@@ -14,18 +14,22 @@ enableRobotsTXT = true
   category = "categories"
 
 [params]
-  author = "你的名字"
-  brand = "你的名字"
-  description = "内容优先、阅读舒适、交互极简的个人博客。"
+  author = "Jack Bird"
+  brand = "Jack Bird"
+  brandSubtitle = "Personal editorial archive"
+  description = "一个以长期写作、项目记录和慢阅读体验为核心的个人博客。"
   defaultTheme = "auto"
-  heroEyebrow = "CONTENT FIRST"
-  heroTitle = "用克制的表达，记录长期有价值的内容。"
-  heroSubtitle = "这里会持续更新技术实践、学习方法、生活随笔与阶段复盘。"
-  heroButtonText = "查看博客"
+  heroEyebrow = "Minimalist Blog Interface"
+  heroTitle = "用更安静的前端，承载长期有效的内容。"
+  heroSubtitle = "这里持续更新博客文章、项目记录与短笔记，围绕长期有效的内容进行整理、沉淀与表达。"
+  heroButtonText = "进入文章归档"
   heroButtonLink = "/posts/"
-  footerNote = "Built with Hugo"
-  github = "https://github.com/your-github-id"
-  email = "you@example.com"
+  aboutHeroImage = "/images/about-hero.jpg"
+  secondaryButtonText = "了解工作流"
+  secondaryButtonLink = "/about/"
+  footerNote = "Published with Hugo."
+  github = "https://github.com/jackycjrt/personal-blog-v2"
+  email = ""
 
 [markup]
   [markup.goldmark]

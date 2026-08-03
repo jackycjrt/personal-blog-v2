@@ -1,108 +1,139 @@
 {{ define "main" }}
-  {{ $posts := where .Site.RegularPages "Section" "posts" }}
-  {{ $featuredPosts := first 4 (sort $posts "Date" "desc") }}
-  {{ $heroPosts := first 3 (sort $posts "Date" "desc") }}
-  {{ $projects := first 5 (sort (where .Site.RegularPages "Section" "projects") "Date" "desc") }}
-  {{ $notes := first 5 (sort (where .Site.RegularPages "Section" "notes") "Date" "desc") }}
+  {{ $posts := sort (where .Site.RegularPages "Section" "posts") "Date" "desc" }}
+  {{ $projects := sort (where .Site.RegularPages "Section" "projects") "Date" "desc" }}
+  {{ $notes := sort (where .Site.RegularPages "Section" "notes") "Date" "desc" }}
+  {{ $featured := index $posts 0 }}
+  {{ $latestPosts := first 5 $posts }}
+  {{ $latestProjects := first 4 $projects }}
+  {{ $latestNotes := first 4 $notes }}
+  {{ $aboutPage := .Site.GetPage "/about" }}
 
   <section class="hero shell">
-    <div class="hero-grid">
-      <div class="hero-content reveal">
-        <p class="eyebrow">{{ .Site.Params.heroEyebrow | default "CONTENT FIRST" }}</p>
-        <h1>{{ .Site.Params.heroTitle | default .Site.Title }}</h1>
-        <p class="hero-subtitle">{{ .Site.Params.heroSubtitle | default .Site.Params.description }}</p>
-        <div class="hero-actions">
-          <a class="btn-primary" href="{{ (.Site.Params.heroButtonLink | default "/posts/") | replaceRE "^/" "" | absURL }}">{{ .Site.Params.heroButtonText | default "查看博客" }}</a>
-          <a class="btn-ghost" href="{{ "about/" | absURL }}">了解我</a>
-        </div>
-        <div class="hero-chips" aria-label="博客内容范围">
-          <span>技术实践</span>
-          <span>学习方法</span>
-          <span>生活观察</span>
-          <span>阶段复盘</span>
-        </div>
+    <div class="hero-copy reveal">
+      <p class="hero-kicker">{{ .Site.Params.heroEyebrow | default "Editorial blog" }}</p>
+      <h1>{{ .Site.Params.heroTitle | default .Site.Title }}</h1>
+      <p class="hero-summary">{{ .Site.Params.heroSubtitle | default .Site.Params.description }}</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="{{ (.Site.Params.heroButtonLink | default "/posts/") | replaceRE "^/" "" | absURL }}">{{ .Site.Params.heroButtonText | default "Read the archive" }}</a>
+        <a class="button button-secondary" href="{{ (.Site.Params.secondaryButtonLink | default "/about/") | replaceRE "^/" "" | absURL }}">{{ .Site.Params.secondaryButtonText | default "About this site" }}</a>
       </div>
+    </div>
 
-      <aside class="hero-panel reveal" aria-label="最新内容速览">
-        <p class="hero-panel-label">Latest</p>
-        <h2>最近更新</h2>
-        <ul class="hero-panel-list">
-          {{ range $heroPosts }}
-            <li>
-              <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-              <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
-            </li>
-          {{ else }}
-            <li>
-              <span>暂无最新内容</span>
-            </li>
-          {{ end }}
-        </ul>
-        <a class="hero-panel-link" href="{{ "posts/" | absURL }}">浏览全部文章</a>
-      </aside>
+    <aside class="hero-panel reveal">
+      <p class="panel-label">Latest dispatch</p>
+      {{ with $featured }}
+        <a class="feature-link" href="{{ .RelPermalink }}">
+          <h2>{{ .Title }}</h2>
+          <p>{{ .Params.summary | default (.Summary | plainify) }}</p>
+          <span>{{ .Date | time.Format "2006.01.02" }}</span>
+        </a>
+      {{ else }}
+        <div class="empty-card">
+          <p>No published posts yet.</p>
+        </div>
+      {{ end }}
+    </aside>
+  </section>
+
+  <section class="intro-band shell reveal">
+    <div>
+      <p class="section-kicker">Writing</p>
+      <p class="band-copy">Long-form notes, project logs, and ongoing study.</p>
+    </div>
+    <div>
+      <p class="section-kicker">Approach</p>
+      <p class="band-copy">A quieter editorial surface built for slow reading, durable ideas, and long-term archives.</p>
     </div>
   </section>
 
   <section class="section shell">
-    <div class="section-head reveal">
-      <h2>博客精选</h2>
-      <a class="section-link" href="{{ "posts/" | absURL }}">查看全部</a>
+    <div class="section-heading reveal">
+      <p class="section-kicker">Recent writing</p>
+      <h2>Latest archive entries</h2>
+      <a class="section-link" href="{{ "posts/" | absURL }}">View all posts</a>
     </div>
-    <div class="post-grid">
-      {{ range $featuredPosts }}
-        <article class="post-card reveal">
-          <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
-          <p class="meta">{{ .Date | time.Format "2006-01-02" }}</p>
-          {{ with .Params.summary }}
-            <p class="summary">{{ . }}</p>
-          {{ end }}
+    <div class="tag-row reveal home-tags">
+      <a class="tag-chip is-active" href="{{ "posts/" | absURL }}">All</a>
+      {{ range .Site.Taxonomies.tags.ByCount }}
+        <a class="tag-chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>
+      {{ end }}
+    </div>
+    <div class="editorial-list">
+      {{ range $latestPosts }}
+        <article class="editorial-row reveal">
+          <div class="row-meta">
+            <span>{{ .Date | time.Format "2006.01.02" }}</span>
+          </div>
+          <div class="row-body">
+            <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+            <p>{{ .Params.summary | default (.Summary | plainify) }}</p>
+          </div>
+          <div class="row-tail">
+            {{ with index .Params.tags 0 }}<span>{{ . }}</span>{{ end }}
+          </div>
         </article>
       {{ else }}
-        <p class="empty-state">当前还没有博客内容。</p>
+        <div class="empty-card reveal">
+          <p>No posts available yet.</p>
+        </div>
       {{ end }}
     </div>
   </section>
 
-  <section class="section shell">
-    <div class="split-grid">
-      <div class="reveal">
-        <div class="section-head">
-          <h2>项目</h2>
-          <a class="section-link" href="{{ "projects/" | absURL }}">查看全部</a>
+  <section class="section shell section-columns">
+    <div class="column-block reveal">
+      <div class="section-heading compact">
+        <div>
+          <p class="section-kicker">Projects</p>
+          <h2>Current builds</h2>
         </div>
-        <ul class="simple-list">
-          {{ range $projects }}
-            <li>
-              <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-              <span>{{ .Date | time.Format "2006-01-02" }}</span>
-            </li>
-          {{ else }}
-            <li><span>暂无项目内容</span></li>
-          {{ end }}
-        </ul>
+        <a class="section-link" href="{{ "projects/" | absURL }}">Open projects</a>
       </div>
+      <ul class="compact-list">
+        {{ range $latestProjects }}
+          <li>
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+            <span>{{ .Date | time.Format "2006.01.02" }}</span>
+          </li>
+        {{ else }}
+          <li class="is-empty">No project entries yet.</li>
+        {{ end }}
+      </ul>
+    </div>
 
-      <div class="reveal">
-        <div class="section-head">
-          <h2>杂记</h2>
-          <a class="section-link" href="{{ "notes/" | absURL }}">查看全部</a>
+    <div class="column-block reveal">
+      <div class="section-heading compact">
+        <div>
+          <p class="section-kicker">Notes</p>
+          <h2>Short observations</h2>
         </div>
-        <ul class="line-list">
-          {{ range $notes }}
-            <li>
-              <div>
-                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-                {{ with .Params.summary }}
-                  <p>{{ . }}</p>
-                {{ end }}
-              </div>
-              <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
-            </li>
-          {{ else }}
-            <li><span>暂无杂记内容</span></li>
-          {{ end }}
-        </ul>
+        <a class="section-link" href="{{ "notes/" | absURL }}">Browse notes</a>
       </div>
+      <ul class="compact-list">
+        {{ range $latestNotes }}
+          <li>
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+            <span>{{ .Date | time.Format "2006.01.02" }}</span>
+          </li>
+        {{ else }}
+          <li class="is-empty">No notes available yet.</li>
+        {{ end }}
+      </ul>
     </div>
   </section>
+
+  {{ with $aboutPage }}
+    <section class="section shell about-preview">
+      <div class="section-heading reveal">
+        <p class="section-kicker">Profile</p>
+        <h2>{{ .Title }}</h2>
+        <a class="section-link" href="{{ .RelPermalink }}">Read more</a>
+      </div>
+      <div class="about-preview-copy reveal">
+        <div class="prose prose-plain">
+          {{ .Summary | default (.Plain | truncate 260) }}
+        </div>
+      </div>
+    </section>
+  {{ end }}
 {{ end }}

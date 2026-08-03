@@ -96,6 +96,153 @@ function Set-FrontMatterDefaults([string]$Content, [string]$FileBaseName, [datet
   return "$frontMatter$normalized"
 }
 
+function Resolve-ExistingPath([string[]]$Candidates) {
+  foreach ($candidate in $Candidates) {
+    if (-not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path -LiteralPath $candidate)) {
+      return (Resolve-Path -LiteralPath $candidate).Path
+    }
+  }
+
+  return $null
+}
+
+function Find-VaultFileByName([string]$RootPath, [string]$FileName) {
+  if ([string]::IsNullOrWhiteSpace($RootPath) -or [string]::IsNullOrWhiteSpace($FileName) -or -not (Test-Path -LiteralPath $RootPath)) {
+    return $null
+  }
+
+  $match = Get-ChildItem -LiteralPath $RootPath -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -eq $FileName } |
+    Select-Object -First 1
+
+  if ($null -ne $match) {
+    return $match.FullName
+  }
+
+  return $null
+}
+
+function Ensure-ParentDirectory([string]$Path) {
+  $parent = Split-Path -Path $Path -Parent
+  if (-not [string]::IsNullOrWhiteSpace($parent) -and -not (Test-Path -LiteralPath $parent)) {
+    New-Item -ItemType Directory -Path $parent -Force | Out-Null
+  }
+}
+
+function Resolve-AssetSource([string]$AssetPath, [string]$CurrentSourceDir, [string]$SourceBlogDir, [string]$VaultDir) {
+  $normalized = ($AssetPath -replace '\\', '/').Trim()
+  $trimmed = $normalized.TrimStart('./')
+  $fileName = [IO.Path]::GetFileName($trimmed)
+  $currentDir = if ([string]::IsNullOrWhiteSpace($CurrentSourceDir)) { $SourceBlogDir } else { $CurrentSourceDir }
+
+  $candidatePaths = @()
+  if (-not [string]::IsNullOrWhiteSpace($currentDir)) {
+    $candidatePaths += (Join-Path $currentDir ($trimmed -replace '/', '\'))
+  }
+  if (-not [string]::IsNullOrWhiteSpace($SourceBlogDir)) {
+    $candidatePaths += (Join-Path $SourceBlogDir ($trimmed -replace '/', '\'))
+  }
+  if (-not [string]::IsNullOrWhiteSpace($VaultDir)) {
+    $candidatePaths += (Join-Path $VaultDir ($trimmed -replace '/', '\'))
+  }
+
+  $resolved = Resolve-ExistingPath -Candidates $candidatePaths
+  if ($null -ne $resolved) {
+    return [PSCustomObject]@{
+      SourcePath = $resolved
+      OutputRelativePath = $trimmed
+    }
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($fileName)) {
+    $resolved = Find-VaultFileByName -RootPath $SourceBlogDir -FileName $fileName
+    if ($null -eq $resolved) {
+      $resolved = Find-VaultFileByName -RootPath $VaultDir -FileName $fileName
+    }
+    if ($null -ne $resolved) {
+      return [PSCustomObject]@{
+        SourcePath = $resolved
+        OutputRelativePath = $fileName
+      }
+    }
+  }
+
+  return $null
+}
+
+function Resolve-ExcalidrawAsset([string]$AssetPath, [string]$CurrentSourceDir, [string]$SourceBlogDir, [string]$VaultDir) {
+  $trimmed = ($AssetPath -replace '\\', '/').Trim().TrimStart('./')
+  $withoutMd = if ($trimmed.EndsWith('.md')) { $trimmed.Substring(0, $trimmed.Length - 3) } else { $trimmed }
+  $baseName = [IO.Path]::GetFileNameWithoutExtension($withoutMd)
+  $relativeDir = Split-Path -Path ($withoutMd -replace '/', '\') -Parent
+
+  $extensions = @('.svg', '.png', '.jpg', '.jpeg', '.webp')
+  foreach ($extension in $extensions) {
+    $relativeAsset = if ([string]::IsNullOrWhiteSpace($relativeDir)) {
+      "$baseName$extension"
+    } else {
+      (($relativeDir -replace '\\', '/') + "/$baseName$extension")
+    }
+
+    $resolved = Resolve-AssetSource -AssetPath $relativeAsset -CurrentSourceDir $CurrentSourceDir -SourceBlogDir $SourceBlogDir -VaultDir $VaultDir
+    if ($null -ne $resolved) {
+      return $resolved
+    }
+  }
+
+  return $null
+}
+
+function Sync-MarkdownAssets([string]$Content, [string]$CurrentSourceDir, [string]$TargetDir, [string]$SourceBlogDir, [string]$VaultDir) {
+  $assetCount = 0
+  $warnings = New-Object System.Collections.Generic.List[string]
+
+  $rewritten = [regex]::Replace(
+    $Content,
+    '!\[(?<alt>[^\]]*)\]\((?<path>[^)]+)\)',
+    {
+      param($match)
+
+      $alt = $match.Groups['alt'].Value
+      $originalPath = $match.Groups['path'].Value.Trim()
+      $asset = $null
+      $outputPath = $null
+
+      if ($originalPath -match '\.excalidraw(\.[^/\)]+)?\.md$') {
+        $asset = Resolve-ExcalidrawAsset -AssetPath $originalPath -CurrentSourceDir $CurrentSourceDir -SourceBlogDir $SourceBlogDir -VaultDir $VaultDir
+        if ($null -eq $asset) {
+          $warnings.Add("Missing exported Excalidraw asset for '$originalPath'")
+          return $match.Value
+        }
+      } else {
+        $asset = Resolve-AssetSource -AssetPath $originalPath -CurrentSourceDir $CurrentSourceDir -SourceBlogDir $SourceBlogDir -VaultDir $VaultDir
+        if ($null -eq $asset) {
+          return $match.Value
+        }
+      }
+
+      $outputPath = Join-Path $TargetDir ($asset.OutputRelativePath -replace '/', '\')
+      Ensure-ParentDirectory -Path $outputPath
+      Copy-Item -LiteralPath $asset.SourcePath -Destination $outputPath -Force
+      $assetCount += 1
+
+      # Hugo renders `content/foo.md` to `/foo/index.html`, so sibling assets
+      # end up one level above the final page URL.
+      $webPath = '../' + ($asset.OutputRelativePath -replace '\\', '/')
+      if ($webPath -match '\s') {
+        $webPath = '<' + $webPath + '>'
+      }
+      return '![' + $alt + '](' + $webPath + ')'
+    }
+  )
+
+  return [PSCustomObject]@{
+    Content = $rewritten
+    AssetCount = $assetCount
+    Warnings = $warnings
+  }
+}
+
 $config = $null
 if (Test-Path $ConfigPath) {
   $config = Get-Content -Path $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -107,6 +254,15 @@ if ([string]::IsNullOrWhiteSpace($SourceBlogDir) -and $null -ne $config -and $nu
 
 if ([string]::IsNullOrWhiteSpace($SourceBlogDir)) {
   throw "SourceBlogDir is required."
+}
+
+$vaultDir = $null
+if ($null -ne $config -and $null -ne $config.vaultDir -and -not [string]::IsNullOrWhiteSpace([string]$config.vaultDir)) {
+  $vaultDir = [string]$config.vaultDir
+}
+
+if ([string]::IsNullOrWhiteSpace($vaultDir)) {
+  $vaultDir = Split-Path -Path $SourceBlogDir -Parent
 }
 
 $managedSubdir = "obsidian"
@@ -256,6 +412,7 @@ Invoke-Python -Arguments @(
 $files = Get-ChildItem -Path $stagingDir -Recurse -File
 $markdownCount = 0
 $assetCount = 0
+$warningMessages = New-Object System.Collections.Generic.List[string]
 
 foreach ($file in $files) {
   $relativePath = $file.FullName.Substring($stagingDir.Length).TrimStart("\", "/")
@@ -272,7 +429,14 @@ foreach ($file in $files) {
     $raw = Get-Content -Path $file.FullName -Raw -Encoding UTF8
     if ($null -eq $raw) { $raw = "" }
     $raw = [regex]::Replace($raw, '\{\{<\s*ref\s+"([^"]+)"\s*>\}\}', './$1')
-    $fixed = Set-FrontMatterDefaults -Content $raw -FileBaseName ([IO.Path]::GetFileNameWithoutExtension($file.Name)) -DefaultDate $file.LastWriteTime -DefaultDraft $defaultDraft
+    $relativeParent = Split-Path -Path $relativePath -Parent
+    $sourceParent = if ([string]::IsNullOrWhiteSpace($relativeParent)) { $SourceBlogDir } else { Join-Path $SourceBlogDir $relativeParent }
+    $syncedAssets = Sync-MarkdownAssets -Content $raw -CurrentSourceDir $sourceParent -TargetDir $targetDir -SourceBlogDir $SourceBlogDir -VaultDir $vaultDir
+    foreach ($warning in $syncedAssets.Warnings) {
+      $warningMessages.Add(("{0}: {1}" -f $relativePath, $warning))
+    }
+    $assetCount += $syncedAssets.AssetCount
+    $fixed = Set-FrontMatterDefaults -Content $syncedAssets.Content -FileBaseName ([IO.Path]::GetFileNameWithoutExtension($file.Name)) -DefaultDate $file.LastWriteTime -DefaultDraft $defaultDraft
     Set-Content -Path $targetPath -Value $fixed -Encoding UTF8
     $markdownCount += 1
   } else {
@@ -282,6 +446,9 @@ foreach ($file in $files) {
 }
 
 Write-Step "Synced $markdownCount markdown files and $assetCount assets"
+foreach ($warning in $warningMessages) {
+  Write-Warning $warning
+}
 
 if ($RunBuild) {
   Write-Step "Running Hugo build"

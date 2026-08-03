@@ -1,60 +1,33 @@
 {{ define "main" }}
-  {{ $paginator := .Paginate (sort .Pages "Date" "desc") }}
-  {{ $isTag := eq .Data.Singular "tag" }}
-
-  <section class="page-intro narrow reveal">
-    <p class="eyebrow">{{ if $isTag }}TAG{{ else }}CATEGORY{{ end }}</p>
-    <h1>{{ .Title }}</h1>
-    <p class="lead">共 {{ len .Pages }} 篇内容。</p>
+  {{ $sorted := sort .Pages "Date" "desc" }}
+  <section class="page-hero shell">
+    <div class="page-hero-copy reveal">
+      <p class="section-kicker">{{ .Data.Singular }}</p>
+      <h1>{{ .Title }}</h1>
+      <p class="page-intro">{{ len .Pages }} entries collected in this archive.</p>
+    </div>
   </section>
 
-  {{ if $isTag }}
-    <section class="section narrow">
-      <div class="tag-filter reveal" aria-label="标签筛选">
-        <a class="tag-chip" href="{{ "/posts/" | absURL }}">全部</a>
-        {{ range .Site.Taxonomies.tags.ByCount }}
-          <a class="tag-chip{{ if eq .Page.Title $.Title }} is-active{{ end }}" href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>
-        {{ end }}
-      </div>
-    </section>
-  {{ end }}
-
-  <section class="section narrow">
-    <div class="stack-list">
-      {{ range $paginator.Pages }}
-        {{ $summary := .Params.summary | default (.Summary | plainify) }}
-        <article class="post-row reveal">
-          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-          <p class="meta-line">
-            <time datetime="{{ .Date | time.Format "2006-01-02" }}">{{ .Date | time.Format "2006-01-02" }}</time>
-            {{ with .Section }}
-              <span>·</span>
-              <span>{{ . }}</span>
-            {{ end }}
-          </p>
-          {{ with $summary }}
-            <p>{{ . }}</p>
-          {{ end }}
+  <section class="section shell">
+    <div class="editorial-list">
+      {{ range $sorted }}
+        <article class="editorial-row reveal">
+          <div class="row-meta">
+            <span>{{ .Date | time.Format "2006.01.02" }}</span>
+          </div>
+          <div class="row-body">
+            <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+            <p>{{ .Params.summary | default (.Summary | plainify) }}</p>
+          </div>
+          <div class="row-tail">
+            <span>{{ .Section }}</span>
+          </div>
         </article>
       {{ else }}
-        <p class="empty-state">当前没有匹配内容。</p>
+        <div class="empty-card reveal">
+          <p>No matching content yet.</p>
+        </div>
       {{ end }}
     </div>
-
-    {{ if gt $paginator.TotalPages 1 }}
-      <nav class="pager" aria-label="筛选结果分页">
-        {{ if $paginator.HasPrev }}
-          <a class="pager-link" href="{{ $paginator.Prev.URL }}">上一页</a>
-        {{ else }}
-          <span class="pager-link is-disabled">上一页</span>
-        {{ end }}
-        <span class="pager-status">第 {{ $paginator.PageNumber }} / {{ $paginator.TotalPages }} 页</span>
-        {{ if $paginator.HasNext }}
-          <a class="pager-link" href="{{ $paginator.Next.URL }}">下一页</a>
-        {{ else }}
-          <span class="pager-link is-disabled">下一页</span>
-        {{ end }}
-      </nav>
-    {{ end }}
   </section>
 {{ end }}

@@ -1,12 +1,116 @@
 {{ define "main" }}
-  <section class="page-intro reading reveal">
-    <p class="eyebrow">ABOUT</p>
-    <h1>{{ .Title }}</h1>
-  </section>
-
-  <section class="article reading">
-    <div class="article-content reveal">
-      {{ .Content }}
+  {{ $aboutHeroImage := (.Site.Params.aboutHeroImage | default "/images/about-hero.jpg") | replaceRE "^/" "" | absURL }}
+  <section class="about-hero-stage">
+    <div id="aboutPainting" class="about-hero-painting" aria-hidden="true" style="--about-hero-image: url('{{ $aboutHeroImage }}');"></div>
+    <div class="about-hero-sticky">
+      <p class="section-kicker">About</p>
+      <div id="aboutHeroFigure" class="about-hero-figure" aria-hidden="true" style="--about-hero-image: url('{{ $aboutHeroImage }}');"></div>
+      <h1 id="aboutHeroTitle" class="about-hero-title">Jack Bird</h1>
+      <a href="#aboutContentStart" class="about-hero-scroll">
+        <span>向下探索</span>
+        <span class="about-hero-arrow">↓</span>
+      </a>
     </div>
   </section>
+
+  <div id="aboutContentStart" class="about-layer shell">
+    <section id="philosophy" class="about-intro reveal">
+      <div class="about-quote">
+        <h2>思想的纹理</h2>
+        <p>
+          “在喧嚣的数字深渊中，我们寻找的不仅是信息，而是那些能让心灵沉静的锚点。写作，便是雕刻时光的斧凿。”
+        </p>
+      </div>
+      <div class="about-copy">
+        <p>
+          这里是Jack Bird的数字书斋。一个摒弃繁杂、追求本质的阅读空间。在这座页面里，文字重新获得中心位置，留白则成为思考的呼吸。
+        </p>
+        <p>
+          我喜欢看看技术、哲学的内容。空闲时会随便写几篇随笔和记录自己做过的项目。希望我们能在碎片化的时代里，能够有结构化，有深度地交流和思考。
+        </p>
+      </div>
+    </section>
+
+    <section id="essays" class="about-section reveal">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Selected</p>
+          <h2>精选文集</h2>
+        </div>
+        <span class="section-link">Essays</span>
+      </div>
+
+      <div class="about-essay-grid">
+        <article class="about-featured-essay">
+          <div class="about-meta-row">
+            <span class="tag-chip">技术</span>
+            <span class="tag-chip">2024.12</span>
+          </div>
+          <h3>Hugo 主题搭建实践</h3>
+          <p>
+            从选择合适的主题到自定义样式，打造属于自己的极简博客。这篇文章分享了如何搭建一个高效、美观的内容管理系统。
+          </p>
+          <a href="{{ "posts/hugo-theme-anthropic-minimal/" | absURL }}" class="about-inline-link">阅读全文</a>
+        </article>
+
+        <div class="about-side-essays">
+          <article class="about-side-essay">
+            <a href="{{ "posts/learning-notes-system/" | absURL }}" class="about-side-essay-link">
+              <span class="about-side-meta">学习方法 / 2024.11</span>
+              <h3>学习笔记系统的构建</h3>
+              <p>建立一个可持续的学习体系，让零散的知识点逐渐形成结构化的认知框架。</p>
+            </a>
+          </article>
+
+          <article class="about-side-essay">
+            <a href="{{ "posts/life-notes-quiet-morning/" | absURL }}" class="about-side-essay-link">
+              <span class="about-side-meta">生活记录 / 2024.10</span>
+              <h3>静谧的早晨观察</h3>
+              <p>在日常生活中寻找细微的美好瞬间，用文字记录那些容易被忽视的思考。</p>
+            </a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="about-section reveal">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Profile</p>
+          <h2>关于这座书斋</h2>
+        </div>
+      </div>
+      <div class="article-body about-body">
+        {{ .Content }}
+      </div>
+    </section>
+
+    <section id="library" class="about-section reveal">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Library</p>
+          <h2>索引入口</h2>
+        </div>
+      </div>
+
+      <div class="about-library-grid">
+        <a href="{{ "posts/" | absURL }}" class="about-library-card">
+          <span class="about-library-label">Archive</span>
+          <strong>归档文章</strong>
+        </a>
+        <a href="{{ "projects/" | absURL }}" class="about-library-card">
+          <span class="about-library-label">Projects</span>
+          <strong>研究与项目</strong>
+        </a>
+        <a href="{{ "notes/" | absURL }}" class="about-library-card">
+          <span class="about-library-label">Notes</span>
+          <strong>札记与短文</strong>
+        </a>
+        <a href="{{ "tags/" | absURL }}" class="about-library-card">
+          <span class="about-library-label">Topics</span>
+          <strong>主题索引</strong>
+        </a>
+      </div>
+    </section>
+  </div>
 {{ end }}
